@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>缓存</title>
+</head>
+
+<body>
+  <script>
+    const times = 20000;
+    let html = ''
+    for (let i = 0; i < times; i++) {
+      html += `<div></div>`
+    }
+    document.body.innerHTML += html
+
+    const divs = document.querySelectorAll('div')
+    for (let i = 0; i < divs.length; i++) {
+      divs[i].innerText = i
+    }
+  </script>
+</body>
+
+</html>

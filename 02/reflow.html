@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>重复排布</title>
+</head>
+
+<body>
+  <script>
+    const times = 100000
+    let html = ''
+    for(let i=0;i<times;i++) {
+      html+= `<div>${i}</div>`
+    }
+    document.body.innerHTML += html
+    const divs = document.querySelectorAll('div')
+    Array.prototype.forEach.call(divs, (div, i) => {
+      div.style.margin = i % 2 ? '10px' : 0;
+    })
+  </script>
+</body>
+
+</html>

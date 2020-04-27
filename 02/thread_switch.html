@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>线程切换</title>
+</head>
+
+<body>
+  <script>
+    // 测试次数：一百万次
+    const times = 1000000
+    // 缓存body元素
+    console.time('object')
+    let body = document.body
+    // 循环赋值对象作为对照参考
+    for (let i = 0; i < times; i++) {
+      let tmp = body
+    }
+    console.timeEnd('object')
+
+    console.time('dom')
+    // 循环读取body元素引发线程切换
+    for (let i = 0; i < times; i++) {
+      let tmp = document.body
+    }
+    console.timeEnd('dom')
+  </script>
+</body>
+
+</html>

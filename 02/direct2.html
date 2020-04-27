@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>直接修改2</title>
+</head>
+
+<body>
+  <script>
+    const times = 20000;
+    let html = ''
+    for (let i = 0; i < times; i++) {
+      html = `<div>${i}${html}</div>`
+    }
+    document.body.innerHTML += html
+    const div = document.querySelector('div')
+    for (let i = 0; i < times; i++) {
+      div.style.fontSize = (i % 12) + 12 + 'px'
+      div.style.color = i % 2 ? 'red' : 'green'
+      div.style.margin = (i % 12) + 12 + 'px'
+    }
+  </script>
+</body>
+
+</html>

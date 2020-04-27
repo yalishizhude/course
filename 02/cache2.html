@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>缓存2</title>
+</head>
+
+<body>
+  <script>
+    const times = 20000;
+    let html = ''
+    for (let i = 0; i < times; i++) {
+      html = `<div>${i}${html}</div>`
+    }
+    document.body.innerHTML += html
+    let queue = []
+    let microTask
+    const st = () => {
+      const div = document.querySelector('div')
+      const style = queue.reduce((acc, cur) => ({...acc, ...cur}), {})
+      for(let prop in style) {
+        div.style[prop] = style[prop]
+      }
+      queue = []
+      microTask = null
+    }
+    const setStyle = (style) => {
+      queue.push(style)
+      if(!microTask) microTask = Promise.resolve().then(st)
+    }
+    for (let i = 0; i < times; i++) {
+      const style = {
+        fontSize: (i % 12) + 12 + 'px',
+        color: i % 2 ? 'red' : 'green',
+        margin:  (i % 12) + 12 + 'px'
+      }
+      setStyle(style)
+    }
+  </script>
+</body>
+
+</html>

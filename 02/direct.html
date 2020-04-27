@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>直接修改</title>
+</head>
+
+<body>
+  <script>
+    const times = 20000;
+    let html = ''
+    for (let i = 0; i < times; i++) {
+      html += `<div></div>`
+    }
+    document.body.innerHTML += html
+
+    for (let i = 0; i < document.querySelectorAll('div').length; i++) {
+      document.querySelectorAll(`div`)[i].innerText = i
+    }
+  </script>
+</body>
+
+</html>
