@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>创建元素</title>
+</head>
+
+<body>
+  <script>
+    const times = 10000;
+    console.time('innerHTML')
+    let html=''
+    for (let i = 0; i < times; i++) {
+      html+='<div></div>'
+    }
+    document.body.innerHTML += html // 31.919921875ms
+    console.timeEnd('innerHTML')
+  </script>
+</body>
+
+</html>

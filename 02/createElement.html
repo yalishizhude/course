@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>创建元素</title>
+</head>
+
+<body>
+  <script>
+    const times = 10000;
+    console.time('createElement')
+    for (let i = 0; i < times; i++) {
+      const div = document.createElement('div')
+      document.body.appendChild(div)
+    }
+    console.timeEnd('createElement')// 54.964111328125ms
+  </script>
+</body>
+
+</html>

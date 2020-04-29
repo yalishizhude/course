@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>减少线程切换</title>
+</head>
+
+<body>
+  <script>
+    const times = 10000;
+
+    console.time('switch')
+    for (let i = 0; i < times; i++) {
+      document.body === 1 ? console.log(1) : void 0;
+    }
+    console.timeEnd('switch')
+
+    var body = JSON.stringify(document.body)
+    console.time('batch')
+    for (let i = 0; i < times; i++) {
+      body === 1 ? console.log(1) : void 0;
+    }
+    console.timeEnd('batch')
+  </script>
+</body>
+
+</html>
