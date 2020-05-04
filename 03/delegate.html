@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>代理</title>
+  <style>
+    .item {
+      padding: 10px;
+    }
+    .edit {
+      margin: 0 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <ul class="list">
+    <li id="item1" class="item">项目1<span class="edit">编辑</span><span class="delete">删除</span></li>
+    <li id="item2" class="item">项目2<span class="edit">编辑</span><span class="delete">删除</span></li>
+    <li id="item3" class="item">项目3<span class="edit">编辑</span><span class="delete">删除</span></li>
+    ...
+  </ul>
+  <script>
+    function getInfo(id){
+      console.log('getInfo', id)
+    }
+    function edit(id){
+      console.log('edit', id)
+    }
+    function del(id){
+      console.log('del', id)
+    }
+    const ul = document.querySelector('.list')
+    ul.addEventListener('click', e => {
+      const t = e.target || e.srcElement
+      if (t.classList.contains('item')) {
+        getInfo(t.id)
+      } else {
+        id = t.parentElement.id
+        if (t.classList.contains('edit')) {
+          edit(id)
+        } else if (t.classList.contains('delete')) {
+          del(id)
+        }
+      }
+    }, true)
+  </script>
+</body>
+
+</html>

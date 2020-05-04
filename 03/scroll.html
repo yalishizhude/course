@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>节流</title>
+  <title>滚动高亮</title>
   <style>
     a,
     a:visited {
@@ -151,14 +151,14 @@
       <p><a href="https://github.com/pandao" title="@pandao">@pandao</a></p>
     </blockquote>
     <p><a href="https://www.mdeditor.com/">普通链接</a><br><a href="https://www.mdeditor.com/"
-        title="普通链接带标题">普通链接带标题</a><br>直接链接：<a href="https://www.mdeditor.com">https://www.mdeditor.com</a><br><a
-        href="https://www.mdeditor.com/">锚点链接</a></p>
-    <p><a href="mailto:test.test@gmail.com">mailto:test.test@gmail.com</a><br>GFM a-tail link <a
-        href="https://github.com/pandao" title="@pandao">@pandao</a><br>邮箱地址自动链接 <a
-        href="mailto:test.test@gmail.com">test.test@gmail.com</a> <a href="mailto:www@vip.qq.com">www@vip.qq.com</a></p>
-    <blockquote>
-      <p><a href="https://github.com/pandao" title="@pandao">@pandao</a></p>
-    </blockquote>
+      title="普通链接带标题">普通链接带标题</a><br>直接链接：<a href="https://www.mdeditor.com">https://www.mdeditor.com</a><br><a
+      href="https://www.mdeditor.com/">锚点链接</a></p>
+  <p><a href="mailto:test.test@gmail.com">mailto:test.test@gmail.com</a><br>GFM a-tail link <a
+      href="https://github.com/pandao" title="@pandao">@pandao</a><br>邮箱地址自动链接 <a
+      href="mailto:test.test@gmail.com">test.test@gmail.com</a> <a href="mailto:www@vip.qq.com">www@vip.qq.com</a></p>
+  <blockquote>
+    <p><a href="https://github.com/pandao" title="@pandao">@pandao</a></p>
+  </blockquote>
   </div>
   <script>
     const wrap = document.querySelector('#wrap')
@@ -176,69 +176,11 @@
     ul.innerHTML += eles
       .map(item => `<li class="${item.tagName.toLowerCase()}" ><a href="#${item.id}">${item.innerText}</a></li>`)
       .reduce((acc, item) => acc += item, '')
-
-
-    const throttle = (func, wait = 0, execFirstCall) => {
-      let timeout = null
-      let args
-      let firstCallTimestamp
-
-      function throttled(...arg) {
-        if (!firstCallTimestamp) firstCallTimestamp = new Date().getTime()
-        if (!execFirstCall || !args) {
-          console.log('set args:', arg)
-          args = arg
-        }
-        if (timeout) {
-          clearTimeout(timeout)
-          timeout = null
-        }
-        // 以Promise的形式返回函数执行结果
-        return new Promise(async(res, rej) => {
-          if (new Date().getTime() - firstCallTimestamp >= wait) {
-            try {
-              const result = await func.apply(this, args)
-              res(result)
-            } catch (e) {
-              rej(e)
-            } finally {
-              cancel()
-            }
-          } else {
-            timeout = setTimeout(async () => {
-              try {
-                const result = await func.apply(this, args)
-                res(result)
-              } catch (e) {
-                rej(e)
-              } finally {
-                cancel()
-              }
-            }, firstCallTimestamp + wait - new Date().getTime())
-          }
-        })
-      }
-      // 允许取消
-      function cancel() {
-        clearTimeout(timeout)
-        args = null
-        timeout = null
-        firstCallTimestamp = null
-      }
-      // 允许立即执行
-      function flush() {
-        cancel()
-        return func.apply(this, args)
-      }
-      throttled.cancel = cancel
-      throttled.flush = flush
-      return throttle
-    }
-    const scroll = throttle(scrollTop => {
+    wrap.addEventListener('scroll', e => {
       let highlightId = ''
       for (let id in offsetMap) {
-        highlightId = id
-        if (scrollTop <= offsetMap[id].offsetTop) {
+        if (e.target.scrollTop <= offsetMap[id].offsetTop) {
+          highlightId = id
           break
         }
       }
@@ -250,9 +192,7 @@
       } else {
         currentElem.classList.add('highlight')
       }
-      highlightId = ''
-    }, 1000, true)
-    wrap.addEventListener('scroll', e => scroll(e.target.scrollTop))
+    })
   </script>
 </body>
 
