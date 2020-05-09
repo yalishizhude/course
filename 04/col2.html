@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>2列布局</title>
+</head>
+
+<body>
+  <style>
+    main,aside {
+      height: 100px;
+    }
+    main {
+      background-color: red;
+    }
+    aside {
+      background-color: green;
+    }
+  </style>
+  <section>
+    1. 将主要布局容器写在次要布局容器之前
+  </section>
+  <div>
+    <main>主要布局容器</main>
+    <aside>次要布局容器</aside>
+  </div>
+  <section>
+    2. 将布局容器进行水平排列
+  </section>
+  <style>
+    .step2-wrap {
+      display: flex;
+      flex-direction: row-reverse;
+    }
+    .step2-main {
+      flex: 1;
+    }
+    .step2-aside {
+      flex: 1;
+    }
+  </style>
+  <div class="step2-wrap">
+    <main class="step2-main">主要布局容器</main>
+    <aside class="step2-aside">次要布局容器</aside>
+  </div>
+  <section>
+    3. 次要容器宽度固定，主要容器撑满
+  </section>
+  <style>
+    .step3-wrap {
+      display: flex;
+      flex-direction: row-reverse;
+    }
+    .step3-main {
+      flex: 1;
+    }
+    .step3-aside {
+      width: 200px;
+    }
+  </style>
+  <div class="step3-wrap">
+    <main class="step3-main">主要布局容器</main>
+    <aside class="step3-aside">次要布局容器</aside>
+  </div>
+  <section>
+    4. 消除副作用(flex不会产生副作用)
+  </section>
+  <style>
+    .step4-wrap {
+      display: flex;
+      flex-direction: row-reverse;
+    }
+    .step4-main {
+      flex: 1;
+    }
+    .step4-aside {
+      width: 200px;
+    }
+  </style>
+  <div class="step4-wrap">
+    <main class="step4-main">主要布局容器</main>
+    <aside class="step4-aside">次要布局容器</aside>
+  </div>
+  <section>
+    5. 利用媒体查询进行优化
+  </section>
+  <style>
+    .step5-wrap {
+      display: flex;
+      flex-direction: row-reverse;
+      flex-wrap: wrap;
+    }
+    .step5-main {
+      flex: 1;
+    }
+    .step5-aside {
+      width: 200px;
+    }
+    @media only screen and (max-width: 1000px) {
+      .step5-wrap {
+        flex-direction: row;
+      }
+      .step5-main {
+        flex: 100%;
+      }
+    }
+  </style>
+  <div class="step5-wrap">
+    <main class="step5-main">
+      <p>2列布局</p>
+      <p>flexbox很轻松</p>
+    </main>
+    <aside class="step5-aside">侧边栏</aside>
+  </div>
+</body>
+
+</html>

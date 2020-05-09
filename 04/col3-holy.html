@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>圣杯优化</title>
+  <style>
+    body,html {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <style>
+    .col3-wrap {
+      padding: 0 100px 0 100px;
+      overflow: hidden;
+    }
+    .col3-main {
+      float: left;
+      width: 100%;
+      height: 200px;
+      background-color: red;
+    }
+    .col3-left {
+      position: relative;
+      float: left;
+      width: 100px;
+      height: 200px;
+      margin-left: -100%;
+      left: -100px;
+      background-color: green;
+    }
+    .col3-right {
+      position: relative;
+      float: left;
+      width: 100px;
+      height: 200px;
+      margin-left: -100px;
+      right: -100px;
+      background-color: blue;
+    }
+    @media only screen and (max-width: 1000px) {
+      .col3-wrap {
+        padding: 0;
+      }
+      .main {
+        width: 100%;
+      }
+      .col3-left {
+        left: 0;
+        margin-left: 0;
+      }
+      .col3-right {
+        margin-left: 0;
+        right: 0;
+      }
+    }
+  </style>
+  <div class="col3-wrap">
+    <main class="col3-main">main</main>
+    <aside class="col3-left">left</aside>
+    <aside class="col3-right">right</aside>
+  </div>
+
+</body>
+
+</html>
