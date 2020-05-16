@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta>
+  <title>sticky footer</title>
+</head>
+<body>
+  <style>
+    html,body {
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      box-sizing: border-box;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+    header, footer {
+      height: 100px;
+      background-color: darkcyan;
+    }
+    main {
+      background-color: yellowgreen;
+    }
+    footer {
+      margin-top: -100px;
+    }
+  </style>
+  <div class="container">
+    <header></header>
+    <main></main>
+  </div>
+  <footer></footer>
+</body>
+</html>
