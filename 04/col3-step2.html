@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>3列布局</title>
+</head>
+
+<body>
+  <style>
+    /* 为了方便查看，给布局容器设置高度和颜色 */
+    .main, .left, .right {
+      height: 100px;
+    }
+    .main {
+      background-color: rgb(214, 137, 114);
+    }
+    .left {
+      background-color: rgb(247, 228, 166);
+    }
+    .right {
+      background-color: rgb(216, 243, 155);;
+    }
+  </style>
+  <style>
+    .main, .left, .right {
+      float: left;
+    }
+  </style>
+  <div class="wrap">
+    <main class="main">main</main>
+    <aside class="left">left</aside>
+    <aside class="right">right</aside>
+  </div>
+</body>
+
+</html>

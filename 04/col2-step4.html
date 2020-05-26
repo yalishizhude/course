@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>2列布局</title>
+</head>
+
+<body>
+  <style>
+    main,aside {
+      height: 100px;
+    }
+    main {
+      background-color: #f09e5a;
+    }
+    aside {
+      background-color: #c295cf;
+    }
+  </style>
+  <section>
+    4. 消除副作用(flex不会产生副作用)
+  </section>
+  <style>
+    .wrap {
+      display: flex;
+      flex-direction: row-reverse;
+    }
+    .main {
+      flex: 1;
+    }
+    .aside {
+      width: 200px;
+    }
+  </style>
+  <div class="wrap">
+    <main class="main">主要布局容器</main>
+    <aside class="aside">次要布局容器</aside>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta>
+  <title>sticky footer</title>
+</head>
+<body>
+  <style>
+    html,body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .container {
+      display: flex;
+      height: 100%;
+      flex-direction: column;
+    }
+    header, footer {
+      min-height: 100px;
+      background-color: darkcyan;
+    }
+    main {
+      flex: 1;
+      background-color: yellowgreen;
+    }
+
+  </style>
+  <div class="container">
+    <header></header>
+    <main>
+        <div>0</div>
+    </main>
+    <footer>1</footer>
+  </div>
+</body>
+</html>
