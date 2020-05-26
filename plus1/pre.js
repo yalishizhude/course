@@ -3,7 +3,7 @@ $b block
 div
   p
     transition zoom(1.4) translateX(10px)
-  .a
+  .a-b
     color red
   #user
     margin 1px 2px
@@ -17,59 +17,75 @@ d-ib
  * type: 
  *   variable
  *   selector
- *   property
+ *   propertbb
  *   value
  * ============================================================================
  */
-function tokenizer(input) {
-  let current = 0;
+function tokenizer(text) {
   let tokens = [];
-  let indent = 0;
-  while (current < input.length) {
-    const char = input[current];
-    const WHITESPACE = /\s/;
-    const SELECTOR = /\.#[a-zA-Z]/
-    if (WHITESPACE.test(char)) {
+  text.trim().split(/\n|\r\n/).forEach(line => {
+    const input = line.trim()
+    let current = 0;
+    let indent = 0;
+    while (current < input.length) {
+      const char = input[current];
+      const WHITESPACE = /\s/;
+      const SELECTOR = /\.|#/
+      let value = ''
+      if (WHITESPACE.test(char)) {
+        current++;
+        indent = char === '\n' || char === '\r\n' ? 0 : (indent + 1)
+        continue;
+      }
+      // 变量
+      if (char === '$') {
+        value = char
+        current++
+        while (/[a-zA-Z0-9]/.test(input[current]) && current < input.length) {
+          value += input[current];
+          current++;
+        }
+        tokens.push({
+          type: 'variable',
+          value,
+          indent: 0
+        })
+        // 跳过空格
+        current++
+        // 值
+        while (/[a-zA-Z0-9\-]/.test(input[current]) && current < input.length) {
+          value += input[current];
+          current++;
+        }
+        tokens.push({
+          type: 'value',
+          value,
+          indent: 0
+        })
+        value = ''
+        indent = 0;
+        continue;
+      }
+      // 选择器
+      if (!WHITESPACE.test(input)) {
+        let value = char
+        current++
+        while (/[a-zA-Z0-9\-]/.test(input[current]) && current < input.length) {
+          value += input[current];
+          current++;
+        }
+        tokens.push({
+          type: 'selector',
+          value,
+          indent
+        })
+        indent = 0;
+        continue;
+      }
       current++;
-      indent = char==='\n' || char==='\r\n' ? 0 : (indent + 1)
-      continue;
     }
-    // 变量
-    if (char === '$') {
-      let value = char
-      current++
-      while (/[a-zA-Z0-9]/.test(input[current]) && current < input.length) {
-        value += input[current];
-        current++;
-      }
-      tokens.push({
-        type: 'variable',
-        value,
-        indent
-      })
-      indent = 0;
-      continue;
-    }
-    // 选择器
-    if(indent === 0 && SELECTOR.test(char)) {
-      let value = char
-      current++
-      while (/[a-zA-Z0-9]/.test(input[current]) && current < input.length) {
-        value += input[current];
-        current++;
-      }
-      tokens.push({
-        type: 'selector',
-        value,
-        indent
-      })
-      indent = 0;
-      continue;
-    }
-    current++;
-  }
-
-  return tokens;
+    return tokens;
+  })
 }
 
 /**
