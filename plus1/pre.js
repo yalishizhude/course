@@ -1,13 +1,11 @@
 const css = `
-$b block
+$ib inline-block
 div
   p
     transition zoom(1.4) translateX(10px)
+  display $ib
   .a-b
     color red
-  #user
-    margin 1px 2px
-  display $b
 d-ib
   display inline-block
 `
@@ -24,9 +22,10 @@ d-ib
 function tokenizer(text) {
   let tokens = [];
   text.trim().split(/\n|\r\n/).forEach(line => {
+    const spaces = line.match(/^\s+/) || ['']
+    const indent = spaces[0].length
     const input = line.trim()
     let current = 0;
-    let indent = 0;
     while (current < input.length) {
       const char = input[current];
       const WHITESPACE = /\s/;
@@ -34,7 +33,6 @@ function tokenizer(text) {
       let value = ''
       if (WHITESPACE.test(char)) {
         current++;
-        indent = char === '\n' || char === '\r\n' ? 0 : (indent + 1)
         continue;
       }
       // 变量
@@ -48,9 +46,10 @@ function tokenizer(text) {
         tokens.push({
           type: 'variable',
           value,
-          indent: 0
+          indent
         })
         // 跳过空格
+        value = ''
         current++
         // 值
         while (/[a-zA-Z0-9\-]/.test(input[current]) && current < input.length) {
@@ -60,10 +59,9 @@ function tokenizer(text) {
         tokens.push({
           type: 'value',
           value,
-          indent: 0
+          indent
         })
         value = ''
-        indent = 0;
         continue;
       }
       // 选择器
@@ -79,106 +77,89 @@ function tokenizer(text) {
           value,
           indent
         })
-        indent = 0;
-        continue;
+      } else {
+        // 属性和值（变量）
+        let words = input.split(/\s/)
+        tokens.push({
+          type: 'property',
+          value: words.shift(),
+          indent
+        })
+        const name = words.join(' ')
+        if (/^\$/.test(name)) {
+          tokens.push({
+            type: 'variable',
+            value: name,
+            indent: 0
+          })
+        } else {
+          tokens.push({
+            type: 'value',
+            value: name,
+            indent: 0
+          })
+        }
       }
-      current++;
+      break;
     }
-    return tokens;
   })
+  return tokens;
 }
 
 /**
  * ============================================================================
  *                             语法分析器（Parser）!!!
+ * {
+ *   type: 'root',
+ *   children: [{
+ *     type: 'variable',
+ *     key: '',
+ *     value: '',
+ *   }, {
+ *     type: 'selector',
+ *     rules: [{
+ *       property: '',
+ *       value: '',
+ *     }],
+ *     indent: 0,
+ *     children: []
+ *   }]
+ * } 
  * ============================================================================
  */
-// 现在我们定义 parser 函数，接受 `tokens` 数组
 function parser(tokens) {
-
-  // 我们再次声明一个 `current` 变量作为指针。
-  var current = 0;
-
-  // 但是这次我们使用递归而不是 `while` 循环，所以我们定义一个 `walk` 函数。
-  function walk() {
-
-    // walk函数里，我们从当前token开始
-    var token = tokens[current];
-
-    // 对于不同类型的结点，对应的处理方法也不同，我们从 `number` 类型的 token 开始。
-    // 检查是不是 `number` 类型
-    if (token.type === 'number') {
-
-      // 如果是，`current` 自增。
-      current++;
-
-      // 然后我们会返回一个新的 AST 结点 `NumberLiteral`，并且把它的值设为 token 的值。
-      return {
-        type: 'NumberLiteral',
-        value: token.value
-      };
-    }
-
-    // 接下来我们检查是不是 CallExpressions 类型，我们从左圆括号开始。
-    if (
-      token.type === 'paren' &&
-      token.value === '('
-    ) {
-
-      // 我们会自增 `current` 来跳过这个括号，因为括号在 AST 中是不重要的。
-      token = tokens[++current];
-
-      // 我们创建一个类型为 `CallExpression` 的根节点，然后把它的 name 属性设置为当前
-      // token 的值，因为紧跟在左圆括号后面的 token 一定是调用的函数的名字。 
-      var node = {
-        type: 'CallExpression',
-        name: token.value,
-        params: []
-      };
-
-      // 我们再次自增 `current` 变量，跳过当前的 token 
-      token = tokens[++current];
-
-      while (
-        (token.type !== 'paren') ||
-        (token.type === 'paren' && token.value !== ')')
-      ) {
-        // 我们调用 `walk` 函数，它将会返回一个结点，然后我们把这个节点
-        // 放入 `node.params` 中。
-        node.params.push(walk());
-        token = tokens[current];
-      }
-
-      // 我们最后一次增加 `current`，跳过右圆括号。
-      current++;
-
-      // 返回结点。
-      return node;
-    }
-
-    // 同样，如果我们遇到了一个类型未知的结点，就抛出一个错误。
-    throw new TypeError(token.type);
-  }
-
-  // 现在，我们创建 AST，根结点是一个类型为 `Program` 的结点。
   var ast = {
-    type: 'Program',
-    body: []
+    type: 'root',
+    children: [],
+    indent: -1
   };
+  let curNode = ast
+  let node
+  let vDict = {}
+  while (node = tokens.shift()) {
+    if (node.type === 'variable') {
+      if (tokens[0] && tokens[0].type === 'value') {
+        const vNode = tokens.shift()
+        vDict[node.value] = vNode.value
+      } else {
+        curNode.rules[curNode.rules.length - 1].value = vDict[node.value]
+      }
+      continue;
+    }
+    if (node.type === 'property') {
+      curNode.rules.push({
+        property: node.value
+      })
+      continue;
+    }
+    if (node.type === 'value') {
+      curNode.rules[curNode.rules.length - 1].value = node.value
+      continue;
+    }
+    if (node.type === 'selector') {
 
-  // 现在我们开始 `walk` 函数，把结点放入 `ast.body` 中。
-  //
-  // 之所以在一个循环中处理，是因为我们的程序可能在 `CallExpressions` 后面包含连续的两个
-  // 参数，而不是嵌套的。
-  //
-  //   (add 2 2)
-  //   (subtract 4 2)
-  //
-  while (current < tokens.length) {
-    ast.body.push(walk());
+    }
   }
-
-  // 最后我们的语法分析器返回 AST 
   return ast;
 }
 
@@ -411,3 +392,5 @@ const pre = {
 };
 const token = pre.tokenizer(css)
 log(token)
+const ast = pre.parser(token)
+log(ast)
