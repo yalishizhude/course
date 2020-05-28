@@ -1,138 +1,92 @@
 const css = `
 $ib inline-block
+$borderColor lightgreen
 div
   p
-    transition zoom(1.4) translateX(10px)
-  display $ib
+    border 1px solid $borderColor
+  color darkkhaki
   .a-b
-    color red
-    #user
+    background-color lightyellow
+    [data]
+      padding 15px
       font-size 12px
 .d-ib
-  display inline-block
+  display $ib
 `
 /*
 最终编译结果：
-div {
-  display: inline-block;
-}
-div p{
-  transition: zoom(1.4) translateX(10px);
-}
-div .a-b {
-  color: red;
-}
-.d-ib {
-  display: inline-block;
-}
+div { color:darkkhaki; }
+div p { border:1px solid lightgreen; }
+div .a-b { background-color:lightyellow; }
+div .a-b [data] { font-size:12px; }
+.d-ib { display:inline-block; }
  */
 /**
  * ============================================================================
- *                            词法分析器（Tokenize）!
- * type: 
- *   variable
- *   selector
- *   propertbb
- *   value
+ *                            步骤1：词法分析
+ * 将源代码字符串分解成为token数组，每个token是一个json对象，结构如下：
+ * {
+ *   type: "variableDef" | "variableRef" | "selector" | "property" | "value", //枚举值，分别对应变量定义、变量引用、选择器、属性、值
+ *   value: string, // token字符值，即被分解的字符串
+ *   indent: number // 缩进空格数，需要根据它判断从属关系
+ * }
  * ============================================================================
  */
 function tokenize(text) {
-  let tokens = [];
-  text.trim().split(/\n|\r\n/).forEach(line => {
+  // 去除多余的空格，逐行解析
+  return text.trim().split(/\n|\r\n/).reduce((tokens, line, idx) => {
+    // 计算缩进空格数
     const spaces = line.match(/^\s+/) || ['']
     const indent = spaces[0].length
+    // 将字符串去首尾空给
     const input = line.trim()
-    let current = 0;
-    while (current < input.length) {
-      const char = input[current];
-      const WHITESPACE = /\s/;
-      const SELECTOR = /\.|#/
-      let value = ''
-      if (WHITESPACE.test(char)) {
-        current++;
-        continue;
-      }
-      // 变量
-      if (char === '$') {
-        value = char
-        current++
-        while (/[a-zA-Z0-9]/.test(input[current]) && current < input.length) {
-          value += input[current];
-          current++;
-        }
-        tokens.push({
-          type: 'variable',
-          value,
-          indent
-        })
-        // 跳过空格
-        value = ''
-        current++
-        // 值
-        while (/[a-zA-Z0-9\-]/.test(input[current]) && current < input.length) {
-          value += input[current];
-          current++;
-        }
-        tokens.push({
-          type: 'value',
-          value,
-          indent
-        })
-        value = ''
-        continue;
-      }
-      // 选择器
-      if (!WHITESPACE.test(input)) {
-        let value = char
-        current++
-        while (/[a-zA-Z0-9\-]/.test(input[current]) && current < input.length) {
-          value += input[current];
-          current++;
-        }
-        tokens.push({
-          type: 'selector',
-          value,
-          indent
-        })
+    // 通过空格分割字符串成数组
+    const words = input.split(/\s/)
+    let value = words.shift()
+    // 选择器为单个单词
+    if (words.length === 0) {
+      tokens.push({
+        type: 'selector',
+        value,
+        indent
+      })
+    } else {
+      //  这里对变量定义和变量引用做一下区分，方便后面语法分析
+      let type = ''
+      if (/^\$/.test(value)) {
+        type = 'variableDef'
+      } else if (/^[a-zA-Z-]+$/.test(value)) {
+        type = 'property'
       } else {
-        // 属性和值（变量）
-        let words = input.split(/\s/)
-        tokens.push({
-          type: 'property',
-          value: words.shift(),
-          indent
-        })
-        const name = words.join(' ')
-        if (/^\$/.test(name)) {
-          tokens.push({
-            type: 'variable',
-            value: name,
-            indent: 0
-          })
-        } else {
-          tokens.push({
-            type: 'value',
-            value: name,
-            indent: 0
-          })
-        }
+        throw new Error(`Tokenize error:Line ${idx} "${value}" is not a vairable or property!`)
       }
-      break;
+      tokens.push({
+        type,
+        value,
+        indent
+      })
+      while (value = words.shift()) {
+        tokens.push({
+          type: /^\$/.test(value) ? 'variableRef' : 'value',
+          value,
+          indent: 0
+        })
+      }
     }
-  })
-  return tokens;
+    return tokens;
+  }, [])
 }
 
 /**
  * ============================================================================
- *                             语法分析器（Parse）!!!
+ *                             步骤2：语法分析（Parse）
  * {
  *   type: 'root',
  *   children: [{
  *     type: 'selector',
  *     rules: [{
  *       property: string,
- *       value: string,
+ *       value: string[],
  *     }],
  *     indent: number,
  *     children: []
@@ -151,7 +105,7 @@ function parse(tokens) {
   let node
   let vDict = {}
   while (node = tokens.shift()) {
-    if (node.type === 'variable') {
+    if (node.type === 'variableDef') {
       if (tokens[0] && tokens[0].type === 'value') {
         const vNode = tokens.shift()
         vDict[node.value] = vNode.value
@@ -163,7 +117,8 @@ function parse(tokens) {
     if (node.type === 'property') {
       if (node.indent > preNode.indent) {
         preNode.rules.push({
-          property: node.value
+          property: node.value,
+          value: []
         })
       } else {
         let parent = path.pop()
@@ -171,7 +126,8 @@ function parse(tokens) {
           parent = path.pop()
         }
         parent.rules.push({
-          property: node.value
+          property: node.value,
+          value: []
         })
         preNode = parent
         path.push(parent)
@@ -179,7 +135,15 @@ function parse(tokens) {
       continue;
     }
     if (node.type === 'value') {
-      preNode.rules[preNode.rules.length - 1].value = node.value
+      try {
+        preNode.rules[preNode.rules.length - 1].value.push(node.value);
+      } catch (e) {
+        console.error(preNode)
+      }
+      continue;
+    }
+    if (node.type === 'variableRef') {
+      preNode.rules[preNode.rules.length - 1].value.push(vDict[node.value]);
       continue;
     }
     if (node.type === 'selector') {
@@ -210,56 +174,69 @@ function parse(tokens) {
 
 /**
  * ============================================================================
- *                                   转换器!!!
+ *                             步骤3：转换
  * ============================================================================
  */
 
 function transform(ast) {
   let newAst = [];
+
   function traverse(node, result, prefix) {
     let selector = ''
-    if(node.type === 'selector') {
-      selector = prefix + ' ' + node.value;
+    if (node.type === 'selector') {
+      selector = [...prefix, node.value];
       result.push({
-        selector,
-        rules: node.rules
+        selector: selector.join(' '),
+        rules: node.rules.reduce((acc, rule) => {
+          acc.push({
+            property: rule.property,
+            value: rule.value.join(' ')
+          })
+          return acc;
+        }, [])
       })
     }
-    for(let i=0;i<node.children.length;i++) {
+    for (let i = 0; i < node.children.length; i++) {
       traverse(node.children[i], result, selector)
     }
-  } 
-  traverse(ast, newAst, '')
+  }
+  traverse(ast, newAst, [])
   return newAst;
 }
 
 /**
  * ============================================================================
- *                         !!!!!!!!!!!!编译器!!!!!!!!!!!
+ *                         步骤4：代码生成
  * ============================================================================
  */
 
-function compile(nodes) {
+function generate(nodes) {
   return nodes.map(n => {
-    let rules = n.rules.reduce((acc,item) => acc+=`${item.property}:${item.value};`, '')
-    return `${n.selector} { ${rules} }`
+    let rules = n.rules.reduce((acc, item) => acc += `${item.property}:${item.value};`, '')
+    return `${n.selector} {${rules}}`
   }).join('\n')
 }
 
-function log(o) {
-  typeof o === 'object' ? console.log(JSON.stringify(o, null, 2)) : console.log(o)
+function log(...args) {
+  Array.prototype.forEach.call(args, o => {
+    typeof o === 'object' ? console.log(JSON.stringify(o, null, 2)) : console.log(o)
+  })
 }
 const pre = {
   tokenize: tokenize,
   parse: parse,
   transform: transform,
-  compile: compile
+  generate: generate
 };
 const token = pre.tokenize(css)
-// log(token)
+log('token:', token)
 const ast = pre.parse(token)
-// log(ast)
+log('ast:', ast)
 const na = pre.transform(ast);
-// log(na)
-const code = pre.compile(na);
-log(code);
+log('newAst:', na)
+const code = pre.generate(na);
+log('code:', code)
+const node = document.createTextNode(code);
+const style = document.createElement('style');
+style.appendChild(node);
+document.head.appendChild(style);
