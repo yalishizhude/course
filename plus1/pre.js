@@ -1,26 +1,3 @@
-const css = `
-$ib inline-block
-$borderColor lightgreen
-div
-  p
-    border 1px solid $borderColor
-  color darkkhaki
-  .a-b
-    background-color lightyellow
-    [data]
-      padding 15px
-      font-size 12px
-.d-ib
-  display $ib
-`
-/*
-最终编译结果：
-div { color:darkkhaki; }
-div p { border:1px solid lightgreen; }
-div .a-b { background-color:lightyellow; }
-div .a-b [data] { font-size:12px; }
-.d-ib { display:inline-block; }
- */
 /**
  * ============================================================================
  *                            步骤1：词法分析
@@ -51,7 +28,7 @@ function tokenize(text) {
         indent
       })
     } else {
-      //  这里对变量定义和变量引用做一下区分，方便后面语法分析
+      // 这里对变量定义和变量引用做一下区分，方便后面语法分析
       let type = ''
       if (/^\$/.test(value)) {
         type = 'variableDef'
@@ -65,6 +42,7 @@ function tokenize(text) {
         value,
         indent
       })
+      // 为了后面解析方便这里对变量引用和值进行区分
       while (value = words.shift()) {
         tokens.push({
           type: /^\$/.test(value) ? 'variableRef' : 'value',
@@ -79,7 +57,8 @@ function tokenize(text) {
 
 /**
  * ============================================================================
- *                             步骤2：语法分析（Parse）
+ *                            步骤2：语法分析（Parse）
+ * 最终AST结构如下：
  * {
  *   type: 'root',
  *   children: [{
@@ -100,11 +79,16 @@ function parse(tokens) {
     children: [],
     indent: -1
   };
+  // 记录当前遍历路径
   let path = [ast]
+  // 指针，指向上一个选择器结点
   let preNode = ast
+  // 便利到的当前结点
   let node
+  // 用来存储变量值的对象
   let vDict = {}
   while (node = tokens.shift()) {
+    // 对于变量引用，直接存储到vDict中
     if (node.type === 'variableDef') {
       if (tokens[0] && tokens[0].type === 'value') {
         const vNode = tokens.shift()
@@ -114,6 +98,7 @@ function parse(tokens) {
       }
       continue;
     }
+    // 对于属性，在指针指向的结点rules属性中添加属性
     if (node.type === 'property') {
       if (node.indent > preNode.indent) {
         preNode.rules.push({
@@ -134,6 +119,7 @@ function parse(tokens) {
       }
       continue;
     }
+    // 对于值，添加到value数组中
     if (node.type === 'value') {
       try {
         preNode.rules[preNode.rules.length - 1].value.push(node.value);
@@ -142,10 +128,12 @@ function parse(tokens) {
       }
       continue;
     }
+    // 对于变量引用，直接替换成对应的值
     if (node.type === 'variableRef') {
       preNode.rules[preNode.rules.length - 1].value.push(vDict[node.value]);
       continue;
     }
+    // 对于选择器需要创建新的结点，并将指针
     if (node.type === 'selector') {
       const item = {
         type: 'selector',
@@ -175,12 +163,24 @@ function parse(tokens) {
 /**
  * ============================================================================
  *                             步骤3：转换
+ * 为了方便代码生成，转换成下面的数组结构
+ * {
+ *   selector: string,
+ *   rules: {
+ *     property: string,
+ *     value: string
+ *   }[]
+ * }[]
  * ============================================================================
  */
-
 function transform(ast) {
   let newAst = [];
-
+  /**
+   * 遍历AST转换成数组，同时将选择器和值拼接起来
+   * @param node AST结点
+   * @param result 抽象语法数组
+   * @param prefix 当前遍历路径上的选择器名称组成的数组
+   */
   function traverse(node, result, prefix) {
     let selector = ''
     if (node.type === 'selector') {
@@ -207,36 +207,15 @@ function transform(ast) {
 /**
  * ============================================================================
  *                         步骤4：代码生成
+ * 生成CSS样式规则：
+ * div { color:darkkhaki; }
+ * ...
  * ============================================================================
  */
-
 function generate(nodes) {
+  // 遍历抽象语法数组，拼接成CSS代码
   return nodes.map(n => {
     let rules = n.rules.reduce((acc, item) => acc += `${item.property}:${item.value};`, '')
     return `${n.selector} {${rules}}`
   }).join('\n')
 }
-
-function log(...args) {
-  Array.prototype.forEach.call(args, o => {
-    typeof o === 'object' ? console.log(JSON.stringify(o, null, 2)) : console.log(o)
-  })
-}
-const pre = {
-  tokenize: tokenize,
-  parse: parse,
-  transform: transform,
-  generate: generate
-};
-const token = pre.tokenize(css)
-log('token:', token)
-const ast = pre.parse(token)
-log('ast:', ast)
-const na = pre.transform(ast);
-log('newAst:', na)
-const code = pre.generate(na);
-log('code:', code)
-const node = document.createTextNode(code);
-const style = document.createElement('style');
-style.appendChild(node);
-document.head.appendChild(style);

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CSS预处理器</title>
 </head>
+
 <body>
   <div>
     <p>
@@ -21,5 +23,43 @@
   <div class="d-ib">am</div>
   <div class="d-ib">inline</div>
   <script src="./pre.js"></script>
+  <script>
+    (function test() {
+      const css =
+        `
+          $ib inline-block
+          $borderColor lightgreen
+          div
+            p
+              border 1px solid $borderColor
+            color darkkhaki
+            .a-b
+              background-color lightyellow
+              [data]
+                padding 15px
+                font-size 12px
+          .d-ib
+            display $ib
+          `
+      function log(...args) {
+        Array.prototype.forEach.call(args, o => {
+          typeof o === 'object' ? console.log(JSON.stringify(o, null, 2)) : console.log(o)
+        })
+      }
+      const token = tokenize(css)
+      log('token:', token)
+      const ast = parse(token)
+      log('ast:', ast)
+      const na = transform(ast);
+      log('newAst:', na)
+      const code = generate(na);
+      log('code:', code)
+      const node = document.createTextNode(code);
+      const style = document.createElement('style');
+      style.appendChild(node);
+      document.head.appendChild(style);
+    }())
+  </script>
 </body>
+
 </html>
