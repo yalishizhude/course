@@ -1,0 +1,15 @@
+{
+  "name": "plus2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "promise.js",
+  "scripts": {
+    "test": "promises-aplus-tests promise.js",
+    "log": "promises-aplus-tests promise.js --reporter spec > test.log"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "promises-aplus-tests": "^2.1.2"
+  }
+}
