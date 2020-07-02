@@ -5,27 +5,31 @@ var REJECTED = 'rejected'
 function Promise(execute) {
   var self = this;
   self.state = PENDING;
-  self.onFullfilledFn = [];
+  self.onFulfilledFn = [];
   self.onRejectedFn = [];
 
   function resolve(value) {
-    if (self.state === PENDING) {
-      self.state = FULFILLED;
-      self.value = value;
-      self.onFullfilledFn.forEach(function (f) {
-        f(self.value);
-      })
-    }
+    setTimeout(function () {
+      if (self.state === PENDING) {
+        self.state = FULFILLED;
+        self.value = value;
+        self.onFulfilledFn.forEach(function (f) {
+          f(self.value);
+        })
+      }
+    })
   }
 
   function reject(reason) {
-    if (self.state === PENDING) {
-      self.state = REJECTED;
-      self.reason = reason;
-      self.onRejectedFn.forEach(function (f) {
-        f(self.reason);
-      })
-    }
+    setTimeout(function () {
+      if (self.state === PENDING) {
+        self.state = REJECTED;
+        self.reason = reason;
+        self.onRejectedFn.forEach(function (f) {
+          f(self.reason);
+        })
+      }
+    })
   }
   try {
     execute(resolve, reject);
@@ -33,8 +37,8 @@ function Promise(execute) {
     reject(e);
   }
 }
-Promise.prototype.then = function (onFullfilled, onRejected) {
-  onFullfilled = typeof onFullfilled === "function" ? onFullfilled : function (x) {
+Promise.prototype.then = function (onFulfilled, onRejected) {
+  onFulfilled = typeof onFulfilled === "function" ? onFulfilled : function (x) {
     return x
   };
   onRejected = typeof onRejected === "function" ? onRejected : function (e) {
@@ -47,10 +51,10 @@ Promise.prototype.then = function (onFullfilled, onRejected) {
       promise = new Promise(function (resolve, reject) {
         setTimeout(function () {
           try {
-            var result = onFullfilled(self.value);
-            resolvePromise(promise, result, resolve, reject);
-          } catch (e) {
-            reject(e)
+            var x = onFulfilled(self.value);
+            resolvePromise(promise, x, resolve, reject);
+          } catch (reason) {
+            reject(reason)
           }
         })
       });
@@ -59,35 +63,31 @@ Promise.prototype.then = function (onFullfilled, onRejected) {
       promise = new Promise(function (resolve, reject) {
         setTimeout(function () {
           try {
-            var result = onRejected(self.reason);
-            resolvePromise(promise, result, resolve, reject);
-          } catch (e) {
-            reject(e)
+            var x = onRejected(self.reason);
+            resolvePromise(promise, x, resolve, reject);
+          } catch (reason) {
+            reject(reason)
           }
         })
       });
       break;
     case PENDING:
       promise = new Promise(function (resolve, reject) {
-        self.onFullfilledFn.push(function () {
-          setTimeout(function () {
-            try {
-              var result = onFullfilled(self.value);
-              resolvePromise(promise, result, resolve, reject);
-            } catch (e) {
-              reject(e)
-            }
-          })
+        self.onFulfilledFn.push(function () {
+          try {
+            var x = onFulfilled(self.value);
+            resolvePromise(promise, x, resolve, reject);
+          } catch (reason) {
+            reject(reason)
+          }
         });
         self.onRejectedFn.push(function () {
-          setTimeout(function () {
-            try {
-              var result = onRejected(self.reason);
-              resolvePromise(promise, result, resolve, reject);
-            } catch (e) {
-              reject(e)
-            }
-          })
+          try {
+            var x = onRejected(self.reason);
+            resolvePromise(promise, x, resolve, reject);
+          } catch (reason) {
+            reject(reason)
+          }
         })
       });
       break;
@@ -97,10 +97,20 @@ Promise.prototype.then = function (onFullfilled, onRejected) {
 
 function resolvePromise(promise, x, resolve, reject) {
   if (promise === x) {
-    throw new TypeError("x与promise相等");
+    return reject(new TypeError("x 不能与 promise 相等"));
   }
-  var executed;
-  if ((x !== null && typeof x === "object") || typeof x === "function") {
+  if (x instanceof Promise) {
+    if (x.state === FULFILLED) {
+      resolve(x.value)
+    } else if (x.state === REJECTED) {
+      reject(x.reason)
+    } else {
+      x.then(function (y) {
+        resolvePromise(promise, y, resolve, reject)
+      }, reject)
+    }
+  } else if ((x !== null) && ((typeof x === 'object') || (typeof x === 'function'))) {
+    var executed;
     try {
       var then = x.then;
       if (typeof then === "function") {
@@ -125,7 +135,7 @@ function resolvePromise(promise, x, resolve, reject) {
     resolve(x);
   }
 }
-/////////////////////////////////////
+/* 为了测试，导出模块 */
 module.exports = {
   deferred() {
     var resolve, reject

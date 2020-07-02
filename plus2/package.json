@@ -5,6 +5,7 @@
   "main": "promise.js",
   "scripts": {
     "test": "promises-aplus-tests promise.js",
+    "test2": "promises-aplus-tests promise2.js",
     "log": "promises-aplus-tests promise.js --reporter spec > test.log"
   },
   "author": "",
