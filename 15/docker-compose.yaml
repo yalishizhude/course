@@ -4,7 +4,7 @@ services:
     image: nginx:alpine
     container_name: sw
     volumes:
-      - ./:/usr/share/nginx/html
+      - ./serviceWorker:/usr/share/nginx/html
     ports:
       - "1234:80"
   http-cache:
@@ -12,6 +12,6 @@ services:
     container_name: http-cache
     working_dir: /app
     volumes:
-      - ./:/app
+      - ./http:/app
     ports:
-      - "1235:80"
+      - "1244:80"

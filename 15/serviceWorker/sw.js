@@ -1,17 +1,25 @@
 const CACHE_NAME = 'ws'
-let preloadUrls = []
+let preloadUrls = ['/index.css']
 
 self.addEventListener('install', function (event) {
-  // 预加载
+  console.log('install')
   event.waitUntil(
     caches.open(CACHE_NAME)
     .then(function (cache) {
       return cache.addAll(preloadUrls);
     })
+    .then(() => {
+      throw new Error(1)
+    })
   );
 });
 
+self.addEventListener('activate', function (event) {
+  console.log('activate')
+});
+
 self.addEventListener('fetch', function (event) {
+  console.log('fetch')
   event.respondWith(
     caches.match(event.request)
     .then(function (response) {
