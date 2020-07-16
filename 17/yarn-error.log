@@ -1,0 +1,27 @@
+Arguments: 
+  /usr/local/bin/node /opt/yarn-v1.16.0/bin/yarn.js add graphql
+
+PATH: 
+  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+Yarn version: 
+  1.16.0
+
+Node version: 
+  12.4.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: connect ECONNREFUSED 104.16.22.35:443
+      at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1054:14)
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

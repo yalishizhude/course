@@ -1,0 +1,16 @@
+version: '3'
+services:
+  o1:
+    image: nginx:alpine
+    container_name: o1
+    volumes:
+      - ./o1:/usr/share/nginx/html
+    ports:
+      - "1680:80"
+  o2:
+    image: nginx:alpine
+    container_name: o2
+    volumes:
+      - ./o2:/usr/share/nginx/html
+    ports:
+      - "1681:80"

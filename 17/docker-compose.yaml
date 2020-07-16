@@ -1,0 +1,12 @@
+version: '3'
+services:
+  graphql:
+    image: node:12
+    container_name: graphql
+    stdin_open: true
+    tty: true
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - "1780:80"

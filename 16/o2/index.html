@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>o2</title>
+</head>
+
+<body>
+  <h1>o2</h1>
+  <script>
+    var url = 'http://www.b.com?callback=fn&params=...';
+
+    var script = document.createElement('script');
+    script.setAttribute("type", "text/javascript");
+    script.src = url;
+    document.body.appendChild(script);
+    script.onerror = function() {
+      console.info(arguments)
+    }
+  </script>
+</body>
+
+</html>
