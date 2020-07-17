@@ -4,12 +4,11 @@ const router = require('koa-router')()
 const koaBodyParser = require('koa-bodyparser')
 const path = require('path')
 const data = require('./data.json')
-const {
-  graphql,
-  buildSchema
-} = require('graphql');
+const { graphql, buildSchema } = require('graphql');
+const { makeExecutableSchema } = require('@graphql-tools/schema')
+const { addMocksToSchema } = require('@graphql-tools/mock')
 
-const schema = buildSchema(`
+const query = `
 type Car {
   no: Int,
   name: String
@@ -25,22 +24,25 @@ type Query {
 type Mutation {
   setHero(id: String, name: String): Hero
 }
-`);
-const root = {
-  hero({id='hello', name='world'}) {
-    return data.hero
-  },
-  setHero(h) {
-    data.hero.push(h)
-    return h
-  }
-};
+`
+const eSchema = makeExecutableSchema({ typeDefs: query })
+const mock = addMocksToSchema({schema: eSchema})
+// const schema = buildSchema(query);
+// const root = {
+//   hero({id='hello', name='world'}) {
+//     return data.hero
+//   },
+//   setHero(h) {
+//     data.hero.push(h)
+//     return h
+//   }
+// };
 const staticPath = './'
 
 const app = new Koa();
 
 router.post('/graphql', async ctx => {
-  graphql(schema, ctx.request.body, root).then((response) => {
+  graphql(mock, ctx.request.body, root).then((response) => {
     ctx.body = response;
   });
 })

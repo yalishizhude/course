@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "graphql": "^15.3.0",
+    "graphql-tools": "^6.0.14",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^9.1.0",
