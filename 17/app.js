@@ -8,7 +8,7 @@ const { graphql, buildSchema } = require('graphql');
 const { makeExecutableSchema } = require('@graphql-tools/schema')
 const { addMocksToSchema } = require('@graphql-tools/mock')
 
-const query = `
+const schemaStr = `
 type Car {
   no: Int,
   name: String
@@ -19,33 +19,40 @@ type Hero {
   car: Car
 }
 type Query {
-  hero(id: String, name: String): [Hero]
+  hero(id: String, name: String): Hero
 }
 type Mutation {
   setHero(id: String, name: String): Hero
 }
 `
-const eSchema = makeExecutableSchema({ typeDefs: query })
-const mock = addMocksToSchema({schema: eSchema})
-// const schema = buildSchema(query);
-// const root = {
-//   hero({id='hello', name='world'}) {
-//     return data.hero
-//   },
-//   setHero(h) {
-//     data.hero.push(h)
-//     return h
-//   }
-// };
+const eSchema = makeExecutableSchema({ typeDefs: schemaStr })
+const mockSchema = addMocksToSchema({schema: eSchema})
+const schema = buildSchema(schemaStr);
+const resolver = {
+  hero(id) {
+    return data.hero.filter(it => it.id === id)
+  },
+  setHero(h) {
+    data.hero.push(h)
+    return h
+  }
+};
 const staticPath = './'
 
 const app = new Koa();
 
-router.post('/graphql', async ctx => {
-  graphql(mock, ctx.request.body, root).then((response) => {
+router.post('/graphql/mock', async ctx => {
+  graphql(mockSchema, ctx.request.body, resolver).then((response) => {
     ctx.body = response;
   });
 })
+
+router.post('/graphql', async ctx => {
+  graphql(schema, ctx.request.body, resolver).then((response) => {
+    ctx.body = response;
+  });
+})
+
 
 app.use(koaBodyParser({
   enableTypes: ['text', 'json', 'form']
