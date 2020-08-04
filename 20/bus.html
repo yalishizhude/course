@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>bus</title>
+  <script src="https://unpkg.com/vue"></script>
+</head>
+
+<body>
+  <div id="app">
+    <button v-on:click="click()">{{this.count}}</button>
+    <button-counter></button-counter>
+    <button-counter></button-counter>
+    <button-counter></button-counter>
+  </div>
+  <script>
+    var EventBus = new Vue();
+    Object.defineProperties(Vue.prototype, {
+      $bus: {
+          get: function () {
+              return EventBus
+          }
+      }
+    })
+    Vue.component('button-counter', {
+      mounted() {
+        this.$bus.$on('count', c => this.count = c)
+      },
+      data() {
+        return {
+          count: 0
+        }
+      },
+      methods: {
+        click() {
+          this.$bus.$emit('count', this.count + 1)
+        }
+      },
+      template: '<button v-on:click="click">You clicked me {{ this.count }} times.</button>'
+    })
+    const app = new Vue({
+      el: '#app',
+      data: {
+        count: 0
+      },
+      mounted() {
+        this.$bus.$on('count', c => this.count = c)
+      },
+      methods: {
+        click() {
+          this.$bus.$emit('count', this.count + 1)
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>

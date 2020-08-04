@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My first Vue app</title>
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://unpkg.com/vuex"></script>
+</head>
+
+<body>
+  <div id="app">
+    <button-counter></button-counter>
+    <button-counter></button-counter>
+    <button-counter></button-counter>
+  </div>
+
+  <script>
+    Vue.use(Vuex)
+    const store = new Vuex.Store({
+      state: {
+        count: 0
+      },
+      mutations: {
+        increment(state, payload) {
+          state.count += payload
+        }
+      }
+    })
+    Vue.component('button-counter', {
+      computed: {
+        count()  {
+          return this.$store.state.count
+        }
+      },
+      methods: {
+        click() {
+          this.$store.commit('increment', 1)
+        }
+      },
+      template: '<button v-on:click="click">You clicked me {{ count }} times.</button>'
+    })
+    const app = new Vue({
+      el: '#app',
+      data: {
+        id: 1
+      },
+      store
+    })
+  </script>
+</body>
+
+</html>

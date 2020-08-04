@@ -1,0 +1,16 @@
+{
+  "name": "21",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "brk": "node --inspect-brk ./app.js",
+    "build": "node ./app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "html-webpack-plugin": "^4.3.0",
+    "webpack": "^5.0.0-beta.23"
+  }
+}

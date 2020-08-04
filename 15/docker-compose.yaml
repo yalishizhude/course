@@ -6,12 +6,18 @@ services:
     volumes:
       - ./serviceWorker:/usr/share/nginx/html
     ports:
-      - "1234:80"
-  http-cache:
-    image: node:12
-    container_name: http-cache
-    working_dir: /app
+      - "1501:80"
+  sw2:
+    image: nginx:alpine
+    container_name: sw2
+    volumes:
+      - ./serviceWorker:/usr/share/nginx/html
+    ports:
+      - "1503:80"
+  http:
+    image: node:10
+    container_name: http
     volumes:
       - ./http:/app
     ports:
-      - "1244:80"
+      - "1502:80" 

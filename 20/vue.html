@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>provide/inject</title>
+  <script src="https://unpkg.com/vue"></script>
+</head>
+
+<body>
+  <div id="app">
+    <button v-on:click="o.count++">{{o.count}}</button>
+    <button-counter></button-counter>
+    <button-counter></button-counter>
+    <button-counter></button-counter>
+  </div>
+  <script>
+    Vue.component('button-counter', {
+      inject: ['o'],
+      methods: {
+        click() {
+          this.o.count++
+        }
+      },
+      template: '<button v-on:click="click">You clicked me {{ o.count }} times.</button>'
+    })
+    const app = new Vue({
+      el: '#app',
+      data: {
+        o: {
+          count: 0
+        }
+      },
+      provide() {
+        return {
+          o: this.o
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
