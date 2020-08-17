@@ -1,0 +1,15 @@
+  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>DOM 型 XSS</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+
+<body>
+  <script>
+    var search = location.search.replace('?search=', '')
+    document.write("你搜索了 :" + decodeURI(search))
+  </script>
+</body>
+</html>
