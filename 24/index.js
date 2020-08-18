@@ -21,6 +21,7 @@ app.get('/dom', function(req, res){
   res.render('dom');
 });
 app.get('/alert', function(req, res){
+  res.setHeader('Referrer-Policy', 'same-origin')
   res.render('alert');
 });
 app.get('/clickjacking', function(req, res){
